@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import Button from '../../components/ui/Button'
 import Card from '../../components/ui/Card'
 import Navbar from '../../components/layout/Navbar'
-import TopNav from '../../components/dashboard/TopNav'
+// TopNav removed to keep header minimal per design
+import { useAuth } from '../../hooks/useAuth'
 import Sidebar from '../../components/layout/Sidebar'
 import UpcomingBookings from '../../components/dashboard/UpcomingBookings'
 
@@ -32,6 +33,7 @@ const dummyNotifications = [
 ]
 
 export default function CustomerDashboard() {
+  const { user } = useAuth()
   const [selectedService, setSelectedService] = useState(serviceOptions[0].value)
   const [date, setDate] = useState('')
   const [bookings, setBookings] = useState(dummyBookings)
@@ -68,7 +70,6 @@ export default function CustomerDashboard() {
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
-      <TopNav />
 
       <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 lg:px-0">
         <Sidebar />
@@ -77,7 +78,7 @@ export default function CustomerDashboard() {
           <div className="rounded-2xl bg-gradient-to-r from-white/90 to-white p-6 shadow-lg">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-extrabold text-slate-900">Welcome back, Ahmed 👋</h2>
+                <h2 className="text-2xl font-extrabold text-slate-900">Welcome back, {user?.name || 'User'} 👋</h2>
                 <p className="mt-1 text-sm text-slate-600">Manage your bookings, payments, and support requests.</p>
               </div>
               <div className="hidden sm:flex items-center gap-3">

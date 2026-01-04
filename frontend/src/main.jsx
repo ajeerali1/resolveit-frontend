@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { HashRouter } from 'react-router-dom'
 import './index.css'
 import AppRouter from './router/AppRouter.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
@@ -12,9 +12,9 @@ initMocks()
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
-      <BrowserRouter>
+      <HashRouter>
         <AppRouter />
-      </BrowserRouter>
+      </HashRouter>
     </AuthProvider>
   </StrictMode>,
 )

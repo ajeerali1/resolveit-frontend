@@ -18,10 +18,10 @@ export default function AuthPage() {
   const [form, setForm] = useState({
     email: '',
     password: '',
-    name: '',
+    firstName: '',
+    lastName: '',
   })
   const [fieldErrors, setFieldErrors] = useState({})
-  const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
   const passwordTooShort = form.password && form.password.length > 0 && form.password.length < 8
@@ -38,12 +38,17 @@ export default function AuthPage() {
 
     if (!form.email.trim()) {
       nextErrors.email = 'Email is required.'
+    } else if (!form.email.includes('@')) {
+      nextErrors.email = 'invalid email address'
     } else if (!emailRegex.test(form.email.trim())) {
-      nextErrors.email = 'Please enter a valid email address.'
+      nextErrors.email = 'invalid email address'
     }
 
-    if (!isLogin && !form.name.trim()) {
-      nextErrors.name = 'Username is required.'
+    if (!isLogin && !form.firstName.trim()) {
+      nextErrors.firstName = 'First name is required.'
+    }
+    if (!isLogin && !form.lastName.trim()) {
+      nextErrors.lastName = 'Last name is required.'
     }
 
     if (!form.password) {
@@ -63,7 +68,7 @@ export default function AuthPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError(null)
+    setFieldErrors({})
     const validationErrors = validate()
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors)
@@ -80,7 +85,8 @@ export default function AuthPage() {
         await register({
           email: form.email,
           password: form.password,
-          name: form.name,
+          firstName: form.firstName,
+          lastName: form.lastName,
           role: role,
         })
         // After registration, also log them in and capture returned user
@@ -108,7 +114,8 @@ export default function AuthPage() {
           ? 'Login failed. Please check your credentials.'
           : 'Registration failed. Please try again.')
 
-      setError(errorMessage)
+      // Show server-side / auth errors under the email field to match field-style errors
+      setFieldErrors((prev) => ({ ...prev, email: errorMessage }))
     } finally {
       setLoading(false)
     }
@@ -128,36 +135,48 @@ export default function AuthPage() {
           </p>
         </div>
 
-        {error && (
-          <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">
-            {error}
-          </div>
-        )}
+        {/* server errors are shown inline under inputs via fieldErrors */}
 
         {loading ? (
           <Loader label={isLogin ? 'Logging in...' : 'Registering...'} />
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             {!isLogin && (
-              <div className="space-y-1">
-                <Input
-                  label="Username"
-                  name="name"
-                  type="text"
-                  value={form.name}
-                  onChange={handleChange}
-                  autoComplete="username"
-                  required
-                />
-                {fieldErrors.name && (
-                  <p className="text-xs text-red-600">{fieldErrors.name}</p>
-                )}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Input
+                    label="First name"
+                    name="firstName"
+                    type="text"
+                    value={form.firstName}
+                    onChange={handleChange}
+                    autoComplete="given-name"
+                    required
+                  />
+                  {fieldErrors.firstName && (
+                    <p className="text-xs text-red-600">{fieldErrors.firstName}</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <Input
+                    label="Last name"
+                    name="lastName"
+                    type="text"
+                    value={form.lastName}
+                    onChange={handleChange}
+                    autoComplete="family-name"
+                    required
+                  />
+                  {fieldErrors.lastName && (
+                    <p className="text-xs text-red-600">{fieldErrors.lastName}</p>
+                  )}
+                </div>
               </div>
             )}
 
             <div className="space-y-1">
               <Input
-                label={isLogin ? 'Email or Username' : 'Email'}
+                label="Email"
                 name="email"
                 type="email"
                 value={form.email}
@@ -233,7 +252,7 @@ export default function AuthPage() {
                     !form.email ||
                     !form.password ||
                     passwordTooShort ||
-                    (!isLogin && !form.name)
+                    (!isLogin && (!form.firstName || !form.lastName))
                   }
                 >
                   Register
@@ -265,11 +284,11 @@ export default function AuthPage() {
           {isLogin ? (
             <p className="text-slate-600">
               Don&apos;t have an account?{' '}
-              <button
+                <button
                 type="button"
                 onClick={() => {
                   setIsLogin(false)
-                  setError(null)
+                  setFieldErrors({})
                   navigate('/auth/register')
                 }}
                 className="font-semibold text-sky-600 hover:text-sky-700"
@@ -284,7 +303,7 @@ export default function AuthPage() {
                 type="button"
                 onClick={() => {
                   setIsLogin(true)
-                  setError(null)
+                  setFieldErrors({})
                   navigate('/auth/login')
                 }}
                 className="font-semibold text-sky-600 hover:text-sky-700"

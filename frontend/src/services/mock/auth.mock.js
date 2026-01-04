@@ -49,11 +49,11 @@ export default function setupAuthMock(mock) {
       const body = JSON.parse(config.data || '{}')
 
       // Validate required fields
-      if (!body.email || !body.password || !body.name) {
+      if (!body.email || !body.password || (!body.firstName && !body.name && !body.lastName)) {
         return [
           400,
           {
-            message: 'Missing required fields. Please provide name, email, and password.',
+            message: 'Missing required fields. Please provide first name, last name, email, and password.',
           },
         ]
       }
@@ -79,12 +79,15 @@ export default function setupAuthMock(mock) {
         ]
       }
 
+      // Build display name from provided fields
+      const name = body.name || `${(body.firstName || '').trim()} ${(body.lastName || '').trim()}`.trim()
+
       // Simulate successful registration
       return [
         201,
         {
           id: `user_${Date.now()}`,
-          name: body.name,
+          name: name,
           email: body.email,
           role: body.role || 'customer',
           createdAt: new Date().toISOString(),

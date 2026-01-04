@@ -43,6 +43,17 @@ export function AuthProvider({ children }) {
         window.localStorage.removeItem(USER_KEY)
       }
     }
+      // No stored auth found -> use frontend-only mock user as single source of truth
+      try {
+        const nextToken = `mock-token-${Date.now()}`
+        const nextUser = mockUser
+        window.localStorage.setItem(TOKEN_KEY, nextToken)
+        window.localStorage.setItem(USER_KEY, JSON.stringify(nextUser))
+        setToken(nextToken)
+        setUser(nextUser)
+      } catch {
+        // ignore storage failures
+      }
   }, [])
 
   const login = async (credentials) => {
@@ -68,7 +79,7 @@ export function AuthProvider({ children }) {
       const identifier = email?.trim().toLowerCase()
       const users = loadUsers()
       const matchedUser = users.find(
-        (u) => (u.email?.toLowerCase() === identifier || u.name?.toLowerCase() === identifier) && u.password === password,
+        (u) => (u.email?.toLowerCase() === identifier) && u.password === password,
       )
       if (!matchedUser) throw err
       const nextToken = `mock-token-${matchedUser.id || matchedUser.email}`
@@ -94,12 +105,12 @@ export function AuthProvider({ children }) {
       const users = loadUsers()
       const emailExists = users.some((u) => u.email?.toLowerCase() === data.email.trim().toLowerCase())
       if (emailExists) throw new Error('An account with this email already exists.')
-      const usernameExists = users.some((u) => u.name?.toLowerCase() === data.name.trim().toLowerCase())
-      if (usernameExists) throw new Error('This username is already taken. Please choose another.')
+      // No username uniqueness check — app now collects first/last name separately
+      const name = data.name ? data.name.trim() : `${(data.firstName || '').trim()} ${(data.lastName || '').trim()}`.trim()
       const newUser = {
         id: Date.now(),
         email: data.email.trim(),
-        name: data.name.trim(),
+        name: name || data.email.split('@')[0],
         role: data.role || 'customer',
         password: data.password,
       }

@@ -89,13 +89,7 @@ export default function Navbar() {
                     Dashboard
                   </Link>
                 )}
-                <div className="flex items-center gap-2 rounded-full bg-slate-100 px-2 py-1">
-                  <img
-                    src={`https://i.pravatar.cc/150?u=${user?.email || 'user'}`}
-                    alt={user?.name || 'User'}
-                    className="h-8 w-8 rounded-full border border-white object-cover"
-                  />
-                  <span className="text-xs font-semibold text-slate-800">{user?.name || 'User'}</span>
+                <div className="flex items-center gap-2">
                   <Button
                     variant="ghost"
                     onClick={handleLogout}
